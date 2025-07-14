@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 정보 수정</title>
+</head>
+<body>
+<h1>회원 정보 수정</h1>
+<form th:action="@{|/api/admin/user/${id}/update|}" th:object="${userPatchRequestDto}" method="POST">
+    <input type="hidden" name="_method" value="PATCH" />
+    <div>
+        <label>이메일: <input type="text" th:field="*{email}" /></label>
+        <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </div>
+    <div>
+        <label>비밀번호: <input type="text" th:field="*{password}" /></label>
+        <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+    </div>
+    <button type="submit">수정</button>
+</form>
+<a th:href="@{/api/admin/user/list}">뒤로가기</a>
+</body>
+</html>
