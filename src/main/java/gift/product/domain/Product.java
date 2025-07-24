@@ -32,6 +32,7 @@ public class Product {
         this.name = name;
         this.price = price;
         this.imageUrl = imageUrl;
+        this.options = new ArrayList<>();
     }
 
     public Product(String name, Integer price, String imageUrl, List<ProductOption> options) {
