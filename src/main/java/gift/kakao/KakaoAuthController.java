@@ -12,21 +12,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/kakaoAuth")
 public class KakaoAuthController {
 
+    private final KakaoAuthService kakaoAuthService;
+
     @Value("${kakao.client_id}")
     private String kakaoClientId;
 
     @Value("${kakao.redirect_uri}")
     private String kakaoRedirectUri;
 
+    public KakaoAuthController(KakaoAuthService kakaoAuthService) {
+        this.kakaoAuthService = kakaoAuthService;
+    }
+
     @GetMapping("/login/page")
     public String loginPage(Model model) {
-        String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id="+kakaoClientId+"&redirect_uri="+kakaoRedirectUri;
+        String location = "http://kauth.kakao.com/oauth/authorize?response_type=code&client_id="+kakaoClientId+"&redirect_uri="+kakaoRedirectUri;
         model.addAttribute("location", location);
         return "kakaoLogin";
     }
 
     @GetMapping("/callback")
     public ResponseEntity<?> callback(@RequestParam("code") String code) {
-        return ResponseEntity.ok("인가 코드 받기 성공");
+        String accessToken = kakaoAuthService.getAccessToken(code);
+        return ResponseEntity.ok("토큰 발급 성공" + accessToken);
     }
 }
