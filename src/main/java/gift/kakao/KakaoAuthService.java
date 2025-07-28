@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class KakaoAuthService {
@@ -37,5 +38,16 @@ public class KakaoAuthService {
                 .body(KakaoTokenResponseDto.class);
 
         return kakaoTokenResponseDto.getAccessToken();
+    }
+
+    public String getLoginUrl() {
+        return UriComponentsBuilder.newInstance()
+                .scheme("http")
+                .host("kauth.kakao.com")
+                .path("/oauth/authorize")
+                .queryParam("response_type", "code")
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", redirectUri)
+                .toUriString();
     }
 }

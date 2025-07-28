@@ -14,19 +14,13 @@ public class KakaoAuthController {
 
     private final KakaoAuthService kakaoAuthService;
 
-    @Value("${kakao.client_id}")
-    private String kakaoClientId;
-
-    @Value("${kakao.redirect_uri}")
-    private String kakaoRedirectUri;
-
     public KakaoAuthController(KakaoAuthService kakaoAuthService) {
         this.kakaoAuthService = kakaoAuthService;
     }
 
     @GetMapping("/login/page")
     public String loginPage(Model model) {
-        String location = "http://kauth.kakao.com/oauth/authorize?response_type=code&client_id="+kakaoClientId+"&redirect_uri="+kakaoRedirectUri;
+        String location = kakaoAuthService.getLoginUrl();
         model.addAttribute("location", location);
         return "kakaoLogin";
     }
