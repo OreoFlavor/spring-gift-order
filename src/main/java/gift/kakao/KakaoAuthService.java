@@ -2,11 +2,14 @@ package gift.kakao;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.time.Duration;
 
 @Service
 public class KakaoAuthService {
@@ -18,8 +21,14 @@ public class KakaoAuthService {
     public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri) {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
+
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofSeconds(3));
+        requestFactory.setReadTimeout(Duration.ofSeconds(7));
+
         this.restClient = RestClient.builder()
                 .baseUrl("https://kauth.kakao.com")
+                .requestFactory(requestFactory)
                 .build();
     }
 
