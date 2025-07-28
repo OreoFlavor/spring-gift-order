@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClientResponseException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -57,8 +57,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
-    @ExceptionHandler(WebClientResponseException.class)
-    public ResponseEntity<String> handleWebClientResponseException(WebClientResponseException e) {
+    @ExceptionHandler(RestClientResponseException.class)
+    public ResponseEntity<String> handleWebClientResponseException(RestClientResponseException e) {
         return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
     }
 }
