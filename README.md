@@ -1,5 +1,13 @@
 # spring-gift-order
 
+## 구현 기능 목록
+
+### Step1
+
+### 1. 인증 코드 받기 구현
+
+### 2. 토큰 받기 구현
+
 # spring-gift-enhancement
 
 ## 구현 기능 목록
