@@ -1,10 +1,14 @@
 package gift.product.controller.api;
 
+import gift.auth.LoginUser;
 import gift.product.domain.Product;
+import gift.product.dto.ProductOrderRequestDto;
 import gift.product.dto.ProductPatchRequestDto;
 import gift.product.dto.ProductSaveRequestDto;
 import gift.product.dto.ProductResponseDto;
 import gift.product.service.ProductService;
+import gift.user.domain.User;
+import gift.wishlist.WishlistService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -67,5 +72,12 @@ public class ProductController {
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/product/order/{id}")
+    public ResponseEntity<ProductResponseDto> orderProduct(@LoginUser User user, @PathVariable Long id, @RequestBody ProductOrderRequestDto productOrderRequestDto) {
+        Product product = productService.orderProduct(user, id, productOrderRequestDto);
+
+        return ResponseEntity.ok(new ProductResponseDto(product));
     }
 }

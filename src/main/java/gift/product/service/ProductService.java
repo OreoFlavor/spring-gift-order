@@ -2,11 +2,12 @@ package gift.product.service;
 
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
-import gift.product.dto.ProductOptionSaveRequestDto;
-import gift.product.dto.ProductPatchRequestDto;
-import gift.product.dto.ProductSaveRequestDto;
+import gift.product.dto.*;
 import gift.product.repository.ProductOptionRepository;
 import gift.product.repository.ProductRepository;
+import gift.user.domain.User;
+import gift.wishlist.Wishlist;
+import gift.wishlist.WishlistService;
 import jakarta.persistence.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,16 +15,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
+    private final WishlistService wishlistService;
 
 
-    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository) {
+    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository, WishlistService wishlistService) {
         this.productRepository = productRepository;
         this.productOptionRepository = productOptionRepository;
+        this.wishlistService = wishlistService;
     }
 
     @Transactional
@@ -94,5 +98,21 @@ public class ProductService {
     public ProductOption getOption(Long optionId) {
         return productOptionRepository.findById(optionId)
                 .orElseThrow(() -> new EntityNotFoundException("옵션을 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public Product orderProduct(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) {
+        Optional<Wishlist> wishlistFound = wishlistService.getWishlistById(user.getId()).stream()
+                .filter(wishlist -> wishlist.getProduct().getId().equals(productId))
+                .findFirst();
+        if (wishlistFound.isPresent()) {
+            Long wishlistId = wishlistFound.get().getId();
+            wishlistService.deleteWishlist(wishlistId);
+        }
+
+        this.decreaseOptionQuantity(productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity());
+
+        return productRepository.findById(productId)
+                .orElseThrow(()->new EntityNotFoundException("존재하지 않는 상품입니다."));
     }
 }

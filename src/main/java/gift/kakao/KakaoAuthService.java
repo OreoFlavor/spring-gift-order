@@ -1,7 +1,9 @@
 package gift.kakao;
 
 import gift.user.domain.User;
+import gift.user.dto.UserSaveRequestDto;
 import gift.user.repository.UserRepository;
+import gift.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,9 +23,10 @@ public class KakaoAuthService {
     private final String clientId;
     private final String redirectUri;
     private final RestClient restClient;
+    private final UserService userService;
     private final UserRepository userRepository;
 
-    public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri, UserRepository userRepository) {
+    public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri, UserService userService, UserRepository userRepository) {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
 
@@ -35,6 +38,7 @@ public class KakaoAuthService {
                 .requestFactory(requestFactory)
                 .build();
 
+        this.userService = userService;
         this.userRepository = userRepository;
     }
 
@@ -73,8 +77,8 @@ public class KakaoAuthService {
 
         return userRepository.findByEmail(email)
                 .orElseGet(()->{
-                    User user = new User(email, " ", " ");
-                    return userRepository.save(user);
+                    UserSaveRequestDto userSaveRequestDto = new UserSaveRequestDto(email, "default");
+                    return userService.createUser(userSaveRequestDto);
                 });
     }
 
