@@ -1,5 +1,7 @@
 package gift.product.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import gift.kakao.KakaoAuthService;
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
 import gift.product.dto.*;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,12 +26,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
     private final WishlistService wishlistService;
+    private final KakaoAuthService kakaoAuthService;
 
 
-    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository, WishlistService wishlistService) {
+    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository, WishlistService wishlistService, KakaoAuthService kakaoAuthService) {
         this.productRepository = productRepository;
         this.productOptionRepository = productOptionRepository;
         this.wishlistService = wishlistService;
+        this.kakaoAuthService = kakaoAuthService;
     }
 
     @Transactional
@@ -101,7 +107,7 @@ public class ProductService {
     }
 
     @Transactional
-    public Product orderProduct(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) {
+    public ProductOrderResponseDto orderProduct(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) throws JsonProcessingException {
         Optional<Wishlist> wishlistFound = wishlistService.getWishlistById(user.getId()).stream()
                 .filter(wishlist -> wishlist.getProduct().getId().equals(productId))
                 .findFirst();
@@ -112,7 +118,8 @@ public class ProductService {
 
         this.decreaseOptionQuantity(productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity());
 
-        return productRepository.findById(productId)
-                .orElseThrow(()->new EntityNotFoundException("존재하지 않는 상품입니다."));
+        kakaoAuthService.sendKakaoOrderMessage(user, productId, productOrderRequestDto);
+
+        return new ProductOrderResponseDto(productId, productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity(), Instant.now().truncatedTo(ChronoUnit.SECONDS), productOrderRequestDto.getMessage());
     }
 }

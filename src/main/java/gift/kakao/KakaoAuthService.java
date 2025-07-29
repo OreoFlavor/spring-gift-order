@@ -1,6 +1,10 @@
 package gift.kakao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gift.common.exception.RefreshTokenExpiredException;
+import gift.product.dto.ProductOrderRequestDto;
 import gift.user.domain.User;
 import gift.user.repository.UserRepository;
 import gift.user.service.UserService;
@@ -92,15 +96,16 @@ public class KakaoAuthService {
                 .queryParam("response_type", "code")
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
+                .queryParam("scope", "talk_message")
                 .toUriString();
     }
 
     @Transactional
     public void updateToken(User user) {
-        if (Instant.now().isAfter(user.getRefreshTokenExpiredAt())) {
+        if (Instant.now().isAfter(user.getRefreshTokenExpiredAt())) { //리프레시 만료
             throw new RefreshTokenExpiredException("재로그인이 필요합니다.");
         }
-        else if (Instant.now().isAfter(user.getAccessTokenExpiredAt())) {
+        else if (Instant.now().isAfter(user.getAccessTokenExpiredAt())) { //액세스 만료/리프레시 만료 x
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("grant_type", "refresh_token");
             params.add("client_id", clientId);
@@ -113,14 +118,45 @@ public class KakaoAuthService {
                     .retrieve()
                     .body(KakaoTokenResponseDto.class);
 
-            if (Instant.now().plusSeconds(2764800).isBefore(user.getRefreshTokenExpiredAt())) { //리프레시 갱신 불가
+            if (Instant.now().plusSeconds(2764800).isBefore(user.getRefreshTokenExpiredAt())) { //리프레시 갱신 불가(잔여 만료 시간 한달 이상)
                 KakaoUserPatchRequestDto kakaoUserPatchRequestDto = new KakaoUserPatchRequestDto(user.getEmail(), user.getPassword(), kakaoTokenResponseDto.accessToken, user.getRefreshToken(), Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), user.getRefreshTokenExpiredAt());
                 userService.updateKakaoUser(user.getId(), kakaoUserPatchRequestDto);
             }
-            else { //리프레시 갱신 가능(만료 한달 이내)
+            else { //리프레시 갱신 가능(잔여 만료 시간 한달 이내)
                 KakaoUserPatchRequestDto kakaoUserPatchRequestDto = new KakaoUserPatchRequestDto(user.getEmail(), user.getPassword(), kakaoTokenResponseDto.accessToken, kakaoTokenResponseDto.refreshToken, Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), Instant.now().plusSeconds(kakaoTokenResponseDto.getRefreshTokenExpiresIn()));
                 userService.updateKakaoUser(user.getId(), kakaoUserPatchRequestDto);
             }
         }
+    }
+
+    @Transactional
+    public void sendKakaoOrderMessage(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) throws JsonProcessingException {
+        this.updateToken(user);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        ObjectNode templateObject = objectMapper.createObjectNode();
+        templateObject.put("object_type", "text");
+        templateObject.put("text", "상품 주문 완료되었습니다. " + productOrderRequestDto.getMessage());
+
+        ObjectNode link = objectMapper.createObjectNode();
+        link.put("web_url", "http://localhost:8080/api/product/" + productId);
+        link.put("mobile_web_url", "http://localhost:8080/api/product/" + productId);
+
+        templateObject.set("link", link);
+        templateObject.put("button_title", "주문 상품 확인");
+
+        String jsonString = objectMapper.writeValueAsString(templateObject);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("template_object", jsonString);
+
+        restClient.post()
+                .uri("https://kapi.kakao.com/v2/api/talk/memo/default/send")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + user.getAccessToken())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(body)
+                .retrieve()
+                .toBodilessEntity();
     }
 }
