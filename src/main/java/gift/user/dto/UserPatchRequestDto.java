@@ -3,8 +3,8 @@ package gift.user.dto;
 import gift.user.domain.User;
 
 public class UserPatchRequestDto {
-    String email;
-    String password;
+    private String email;
+    private String password;
 
     protected UserPatchRequestDto() {}
 

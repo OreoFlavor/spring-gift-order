@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotNull;
 
 public class UserSaveRequestDto {
     @NotNull
-    String email;
+    private String email;
     @NotNull
-    String password;
+    private String password;
 
     public UserSaveRequestDto() {};
 
