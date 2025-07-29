@@ -1,6 +1,8 @@
 package gift.user.service;
 
 import gift.auth.PasswordUtil;
+import gift.kakao.KakaoUserPatchRequestDto;
+import gift.kakao.KakaoUserSaveRequestDto;
 import gift.user.domain.User;
 import gift.user.dto.UserPatchRequestDto;
 import gift.user.dto.UserSaveRequestDto;
@@ -32,6 +34,15 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
+    public User createKakaoUser(KakaoUserSaveRequestDto kakaoUserSaveRequestDto) {
+        byte[] salt = PasswordUtil.generateSalt();
+        String hashedPassword = PasswordUtil.encryptPassword(kakaoUserSaveRequestDto.getPassword(), salt);
+
+        User user = new User(kakaoUserSaveRequestDto.getEmail(), hashedPassword, Base64.getEncoder().encodeToString(salt), kakaoUserSaveRequestDto.getAccessToken(), kakaoUserSaveRequestDto.getRefreshToken(), kakaoUserSaveRequestDto.getAccessTokenExpiredAt(), kakaoUserSaveRequestDto.getRefreshTokenExpiredAt());
+        return userRepository.save(user);
+    }
+
     @Transactional(readOnly = true)
     public List<User> findAll() {
         return userRepository.findAll();
@@ -58,6 +69,17 @@ public class UserService {
         String hashedPassword = PasswordUtil.encryptPassword(userPatchRequestDto.getPassword(), salt);
 
         return userRepository.save(new User(user.getId(), userPatchRequestDto.getEmail(), hashedPassword, user.getSalt()));
+    }
+
+    @Transactional
+    public User updateKakaoUser(Long id, KakaoUserPatchRequestDto kakaoUserPatchRequestDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID가 존재하지 않습니다."));
+
+        byte[] salt = Base64.getDecoder().decode(user.getSalt());
+        String hashedPassword = PasswordUtil.encryptPassword(kakaoUserPatchRequestDto.getPassword(), salt);
+
+        return userRepository.save(new User(user.getId(), kakaoUserPatchRequestDto.getEmail(), hashedPassword, user.getSalt(), kakaoUserPatchRequestDto.getAccessToken(), kakaoUserPatchRequestDto.getRefreshToken(), kakaoUserPatchRequestDto.getAccessTokenExpiredAt(), kakaoUserPatchRequestDto.getRefreshTokenExpiredAt()));
     }
 
     @Transactional

@@ -3,6 +3,7 @@ package gift.user.domain;
 import gift.auth.PasswordUtil;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.Base64;
 
 @Entity
@@ -20,6 +21,14 @@ public class User {
 
     private String salt;
 
+    private String accessToken;
+
+    private String refreshToken;
+
+    private Instant accessTokenExpiredAt;
+
+    private Instant refreshTokenExpiredAt;
+
     protected User() {
 
     }
@@ -31,8 +40,23 @@ public class User {
         this.salt = salt;
     }
 
+    public User(Long id, String email, String password, String salt, String accessToken, String refreshToken, Instant accessTokenExpiredAt, Instant refreshTokenExpiredAt) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.salt = salt;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.accessTokenExpiredAt = accessTokenExpiredAt;
+        this.refreshTokenExpiredAt = refreshTokenExpiredAt;
+    }
+
     public User(String email, String password, String salt) {
         this(null, email, password, salt);
+    }
+
+    public User(String email, String password, String salt, String accessToken, String refreshToken, Instant accessTokenExpiredAt, Instant refreshTokenExpiredAt) {
+        this(null, email, password, salt, accessToken, refreshToken, accessTokenExpiredAt, refreshTokenExpiredAt);
     }
   
     public boolean isEqualToPassword(String password) {
@@ -69,5 +93,21 @@ public class User {
 
     public String getSalt() {
         return salt;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public Instant getAccessTokenExpiredAt() {
+        return accessTokenExpiredAt;
+    }
+
+    public Instant getRefreshTokenExpiredAt() {
+        return refreshTokenExpiredAt;
     }
 }

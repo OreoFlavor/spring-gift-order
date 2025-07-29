@@ -1,19 +1,20 @@
 package gift.kakao;
 
+import gift.user.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/kakaoAuth")
 public class KakaoAuthController {
 
     private final KakaoAuthService kakaoAuthService;
+    private final UserService userService;
 
-    public KakaoAuthController(KakaoAuthService kakaoAuthService) {
+    public KakaoAuthController(KakaoAuthService kakaoAuthService, UserService userService) {
         this.kakaoAuthService = kakaoAuthService;
+        this.userService = userService;
     }
 
     @GetMapping("/login/page")
@@ -25,8 +26,9 @@ public class KakaoAuthController {
 
     @GetMapping("/callback")
     public String callback(@RequestParam("code") String code) {
-        String userId = kakaoAuthService.getUserId(kakaoAuthService.getAccessToken(code));
-        kakaoAuthService.kakaoUserLogin(userId);
+        KakaoTokenResponseDto kakaoTokenResponseDto = kakaoAuthService.getTokenInfo(code);
+        String userId = kakaoAuthService.getUserId(kakaoTokenResponseDto.getAccessToken());
+        kakaoAuthService.kakaoUserLogin(userId, kakaoTokenResponseDto);
         return "redirect:/api/admin/user/list";
     }
 }

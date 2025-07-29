@@ -58,7 +58,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RestClientResponseException.class)
-    public ResponseEntity<String> handleWebClientResponseException(RestClientResponseException e) {
+    public ResponseEntity<String> handleRestClientResponseException(RestClientResponseException e) {
         return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+    }
+
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    public ResponseEntity<String> handleRefreshTokenExpiredException(RefreshTokenExpiredException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 }
