@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/wishlist")
@@ -22,26 +23,31 @@ public class WishlistController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<Wishlist>> getWishlist(@LoginUser User user) {
-        List<Wishlist> wishlist = wishlistService.getWishlistById(user.getId());
+    public ResponseEntity<List<WishlistResponseDto>> getWishlist(@LoginUser User user) {
+        List<WishlistResponseDto> wishlist = wishlistService.getWishlistById(user.getId()).stream()
+                .map(wish -> new WishlistResponseDto(wish.getId(), wish.getUser().getId(), wish.getProduct().getId()))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(wishlist);
     }
 
     @GetMapping("/page")
-    public ResponseEntity<Page<Wishlist>> findAllByPage(
+    public ResponseEntity<Page<WishlistResponseDto>> findAllByPage(
             @LoginUser User user,
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<Wishlist> responseDtoPage = wishlistService.getWishlistByIdAndPage(user.getId(), pageable);
+        Page<WishlistResponseDto> responseDtoPage = wishlistService.getWishlistByIdAndPage(user.getId(), pageable)
+                .map(wishlist->new WishlistResponseDto(wishlist.getId(), wishlist.getUser().getId(), wishlist.getProduct().getId()));
         return ResponseEntity.ok(responseDtoPage);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Wishlist> addWishlist(@LoginUser User user, @RequestBody WishlistSaveRequestDto wishlistSaveRequestDto) {
+    public ResponseEntity<WishlistResponseDto> addWishlist(@LoginUser User user, @RequestBody WishlistSaveRequestDto wishlistSaveRequestDto) {
         Wishlist wishlist =  wishlistService.createWishlist(user, wishlistSaveRequestDto);
+        WishlistResponseDto wishlistResponseDto = new WishlistResponseDto(wishlist.getId(), wishlist.getUser().getId(), wishlist.getProduct().getId());
         return ResponseEntity
                 .created(URI.create("/api/wishlist/" + wishlist.getId()))
-                .body(wishlist);
+                .body(wishlistResponseDto);
     }
 
     @DeleteMapping("/{id}/delete")
