@@ -1,21 +1,12 @@
 package gift.user.dto;
 
-import gift.user.domain.User;
-
 public class UserPatchRequestDto {
-    private String email;
-    private String password;
-
-    protected UserPatchRequestDto() {}
+    private final String email;
+    private final String password;
 
     public UserPatchRequestDto(String email, String password) {
         this.email = email;
         this.password = password;
-    }
-
-    public UserPatchRequestDto(User user) {
-        this.email = user.getEmail();
-        this.password = user.getPassword();
     }
 
     public String getEmail() {
@@ -24,13 +15,5 @@ public class UserPatchRequestDto {
 
     public String getPassword() {
         return password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }
