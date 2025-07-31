@@ -59,7 +59,7 @@ public class KakaoMessageService {
 
         restClient.post()
                 .uri("https://kapi.kakao.com/v2/api/talk/memo/default/send")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + user.getAccessToken())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + user.getOAuthToken().getAccessToken())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(body)
                 .retrieve()

@@ -1,5 +1,7 @@
 package gift.user.service;
 
+import gift.OAuth.OAuthToken;
+import gift.OAuth.OAuthTokenRepository;
 import gift.auth.PasswordUtil;
 import gift.kakao.KakaoUserPatchRequestDto;
 import gift.kakao.KakaoUserSaveRequestDto;
@@ -18,11 +20,11 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final EntityManager entityManager;
+    private final OAuthTokenRepository oAuthTokenRepository;
 
-    public UserService(UserRepository userRepository, EntityManager entityManager) {
+    public UserService(UserRepository userRepository, OAuthTokenRepository oAuthTokenRepository) {
         this.userRepository = userRepository;
-        this.entityManager = entityManager;
+        this.oAuthTokenRepository = oAuthTokenRepository;
     }
 
     @Transactional
@@ -39,7 +41,10 @@ public class UserService {
         byte[] salt = PasswordUtil.generateSalt();
         String hashedPassword = PasswordUtil.encryptPassword(kakaoUserSaveRequestDto.getPassword(), salt);
 
-        User user = new User(kakaoUserSaveRequestDto.getEmail(), hashedPassword, Base64.getEncoder().encodeToString(salt), kakaoUserSaveRequestDto.getAccessToken(), kakaoUserSaveRequestDto.getRefreshToken(), kakaoUserSaveRequestDto.getAccessTokenExpiredAt(), kakaoUserSaveRequestDto.getRefreshTokenExpiredAt());
+
+        OAuthToken oAuthToken = new OAuthToken(kakaoUserSaveRequestDto.getAccessToken(), kakaoUserSaveRequestDto.getRefreshToken(), kakaoUserSaveRequestDto.getAccessTokenExpiredAt(), kakaoUserSaveRequestDto.getRefreshTokenExpiredAt());
+        User user = new User(kakaoUserSaveRequestDto.getEmail(), hashedPassword, Base64.getEncoder().encodeToString(salt), oAuthToken);
+        user.setOAuthToken(oAuthToken);
         return userRepository.save(user);
     }
 
@@ -79,7 +84,7 @@ public class UserService {
         byte[] salt = Base64.getDecoder().decode(user.getSalt());
         String hashedPassword = PasswordUtil.encryptPassword(kakaoUserPatchRequestDto.getPassword(), salt);
 
-        return userRepository.save(new User(user.getId(), kakaoUserPatchRequestDto.getEmail(), hashedPassword, user.getSalt(), kakaoUserPatchRequestDto.getAccessToken(), kakaoUserPatchRequestDto.getRefreshToken(), kakaoUserPatchRequestDto.getAccessTokenExpiredAt(), kakaoUserPatchRequestDto.getRefreshTokenExpiredAt()));
+        return userRepository.save(new User(user.getId(), kakaoUserPatchRequestDto.getEmail(), hashedPassword, user.getSalt(), user.getOAuthToken()));
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package gift.user.domain;
 
+import gift.OAuth.OAuthToken;
 import gift.auth.PasswordUtil;
 import jakarta.persistence.*;
 
@@ -21,16 +22,19 @@ public class User {
 
     private String salt;
 
-    private String accessToken;
-
-    private String refreshToken;
-
-    private Instant accessTokenExpiredAt;
-
-    private Instant refreshTokenExpiredAt;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private OAuthToken oAuthToken;
 
     protected User() {
 
+    }
+
+    public User(Long id, String email, String password, String salt, OAuthToken oAuthToken) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.salt = salt;
+        this.oAuthToken = oAuthToken;
     }
 
     public User(Long id, String email, String password, String salt) {
@@ -40,23 +44,12 @@ public class User {
         this.salt = salt;
     }
 
-    public User(Long id, String email, String password, String salt, String accessToken, String refreshToken, Instant accessTokenExpiredAt, Instant refreshTokenExpiredAt) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.salt = salt;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.accessTokenExpiredAt = accessTokenExpiredAt;
-        this.refreshTokenExpiredAt = refreshTokenExpiredAt;
+    public User(String email, String password, String salt, OAuthToken oAuthToken) {
+        this(null, email, password, salt, oAuthToken);
     }
 
     public User(String email, String password, String salt) {
-        this(null, email, password, salt);
-    }
-
-    public User(String email, String password, String salt, String accessToken, String refreshToken, Instant accessTokenExpiredAt, Instant refreshTokenExpiredAt) {
-        this(null, email, password, salt, accessToken, refreshToken, accessTokenExpiredAt, refreshTokenExpiredAt);
+        this(null, email, password, salt, new OAuthToken());
     }
   
     public boolean isEqualToPassword(String password) {
@@ -95,19 +88,12 @@ public class User {
         return salt;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public OAuthToken getOAuthToken() {
+        return oAuthToken;
     }
 
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public Instant getAccessTokenExpiredAt() {
-        return accessTokenExpiredAt;
-    }
-
-    public Instant getRefreshTokenExpiredAt() {
-        return refreshTokenExpiredAt;
+    public void setOAuthToken(OAuthToken oAuthToken) {
+        this.oAuthToken = oAuthToken;
+        oAuthToken.setUser(this);
     }
 }

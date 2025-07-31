@@ -108,14 +108,14 @@ public class KakaoAuthService {
 
     @Transactional
     public void updateToken(User user) {
-        if (Instant.now().isAfter(user.getRefreshTokenExpiredAt())) { //리프레시 만료
+        if (Instant.now().isAfter(user.getOAuthToken().getRefreshTokenExpiredAt())) { //리프레시 만료
             throw new RefreshTokenExpiredException("재로그인이 필요합니다.");
         }
-        else if (Instant.now().isAfter(user.getAccessTokenExpiredAt())) { //액세스 만료/리프레시 만료 x
+        else if (Instant.now().isAfter(user.getOAuthToken().getAccessTokenExpiredAt())) { //액세스 만료/리프레시 만료 x
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.add("grant_type", "refresh_token");
             params.add("client_id", clientId);
-            params.add("refresh_token", user.getRefreshToken());
+            params.add("refresh_token", user.getOAuthToken().getRefreshToken());
 
             KakaoTokenResponseDto kakaoTokenResponseDto = restClient.post()
                     .uri("https://kauth.kakao.com/oauth/token")
@@ -124,8 +124,8 @@ public class KakaoAuthService {
                     .retrieve()
                     .body(KakaoTokenResponseDto.class);
 
-            if (Instant.now().plusSeconds(2764800).isBefore(user.getRefreshTokenExpiredAt())) { //리프레시 갱신 불가(잔여 만료 시간 한달 이상)
-                KakaoUserPatchRequestDto kakaoUserPatchRequestDto = new KakaoUserPatchRequestDto(user.getEmail(), user.getPassword(), kakaoTokenResponseDto.accessToken, user.getRefreshToken(), Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), user.getRefreshTokenExpiredAt());
+            if (Instant.now().plusSeconds(2764800).isBefore(user.getOAuthToken().getRefreshTokenExpiredAt())) { //리프레시 갱신 불가(잔여 만료 시간 한달 이상)
+                KakaoUserPatchRequestDto kakaoUserPatchRequestDto = new KakaoUserPatchRequestDto(user.getEmail(), user.getPassword(), kakaoTokenResponseDto.accessToken, user.getOAuthToken().getRefreshToken(), Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), user.getOAuthToken().getRefreshTokenExpiredAt());
                 userService.updateKakaoUser(user.getId(), kakaoUserPatchRequestDto);
             }
             else { //리프레시 갱신 가능(잔여 만료 시간 한달 이내)

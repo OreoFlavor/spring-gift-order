@@ -12,10 +12,10 @@
         <td th:text="${user.id}"></td>
         <td th:text="${user.email}"></td>
         <td th:text="${user.password}"></td>
-        <td th:text="${user.accessToken}"></td>
-        <td th:text="${user.refreshToken}"></td>
-        <td th:text="${user.accessTokenExpiredAt}"></td>
-        <td th:text="${user.refreshTokenExpiredAt}"></td>
+        <td th:text="${user.getOAuthToken().accessToken}"></td>
+        <td th:text="${user.getOAuthToken().refreshToken}"></td>
+        <td th:text="${user.getOAuthToken().accessTokenExpiredAt}"></td>
+        <td th:text="${user.getOAuthToken().refreshTokenExpiredAt}"></td>
         <td><a th:href="@{|/api/admin/user/${user.id}/update|}">수정</a></td>
         <td><form th:action="@{|/api/admin/user/${user.id}/delete|}" method="post">
             <input type="hidden" name="_method" value="delete" />
