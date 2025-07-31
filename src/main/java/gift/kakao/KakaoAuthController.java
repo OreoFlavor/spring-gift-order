@@ -1,5 +1,7 @@
 package gift.kakao;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +24,10 @@ public class KakaoAuthController {
     }
 
     @GetMapping("/callback")
-    public String callback(@RequestParam("code") String code) {
-        KakaoTokenResponseDto kakaoTokenResponseDto = kakaoAuthService.getTokenInfo(code);
-        String userId = kakaoAuthService.getUserId(kakaoTokenResponseDto.getAccessToken());
-        kakaoAuthService.kakaoUserLogin(userId, kakaoTokenResponseDto);
-        return "redirect:/api/admin/user/list";
+    public ResponseEntity<?> callback(@RequestParam("code") String code) {
+        String token = kakaoAuthService.kakaoUserLogin(code);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer "+token).body(token);
     }
 }

@@ -1,5 +1,6 @@
 package gift.kakao;
 
+import gift.auth.JwtProvider;
 import gift.common.exception.RefreshTokenExpiredException;
 import gift.user.domain.User;
 import gift.user.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class KakaoAuthService {
@@ -26,8 +28,9 @@ public class KakaoAuthService {
     private final RestClient restClient;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
-    public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri, UserService userService, UserRepository userRepository) {
+    public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri, UserService userService, UserRepository userRepository, JwtProvider jwtProvider) {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
 
@@ -41,6 +44,7 @@ public class KakaoAuthService {
 
         this.userService = userService;
         this.userRepository = userRepository;
+        this.jwtProvider = jwtProvider;
     }
 
     @Transactional
@@ -68,19 +72,25 @@ public class KakaoAuthService {
                 .header(HttpHeaders.AUTHORIZATION, " Bearer " + accessToken)
                 .retrieve()
                 .body(Map.class);
-
         return response.get("id").toString();
     }
 
     @Transactional
-    public User kakaoUserLogin(String id, KakaoTokenResponseDto kakaoTokenResponseDto) {
-        String email = id + "@kakao.com";
+    public String kakaoUserLogin(String code) {
+        KakaoTokenResponseDto kakaoTokenResponseDto = getTokenInfo(code);
+        String userId = getUserId(kakaoTokenResponseDto.getAccessToken());
+        String email = userId + "@kakao.com";
 
-        return userRepository.findByEmail(email)
-                .orElseGet(()->{
-                    KakaoUserSaveRequestDto kakaoUserSaveRequestDto = new KakaoUserSaveRequestDto(email, "default", kakaoTokenResponseDto.getAccessToken(), kakaoTokenResponseDto.refreshToken, Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), Instant.now().plusSeconds(kakaoTokenResponseDto.getRefreshTokenExpiresIn()));
-                    return userService.createKakaoUser(kakaoUserSaveRequestDto);
-                });
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if(optionalUser.isPresent()) {
+            return jwtProvider.createToken(optionalUser.get());
+        }
+        else {
+            KakaoUserSaveRequestDto kakaoUserSaveRequestDto = new KakaoUserSaveRequestDto(email, "default", kakaoTokenResponseDto.getAccessToken(), kakaoTokenResponseDto.refreshToken, Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), Instant.now().plusSeconds(kakaoTokenResponseDto.getRefreshTokenExpiresIn()));
+            userService.createKakaoUser(kakaoUserSaveRequestDto);
+            return jwtProvider.createToken(userService.findByEmail(email));
+        }
     }
 
     @Transactional
