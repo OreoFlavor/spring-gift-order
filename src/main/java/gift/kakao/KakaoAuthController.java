@@ -1,6 +1,5 @@
 package gift.kakao;
 
-import gift.user.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

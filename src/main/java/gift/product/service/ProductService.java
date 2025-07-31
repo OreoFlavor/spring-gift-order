@@ -26,15 +26,10 @@ import java.util.Optional;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
-    private final WishlistService wishlistService;
-    private final KakaoMessageService kakaoMessageService;
 
-
-    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository, WishlistService wishlistService, KakaoMessageService kakaoMessageService) {
+    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository) {
         this.productRepository = productRepository;
         this.productOptionRepository = productOptionRepository;
-        this.wishlistService = wishlistService;
-        this.kakaoMessageService = kakaoMessageService;
     }
 
     @Transactional
@@ -105,22 +100,5 @@ public class ProductService {
     public ProductOption getOption(Long optionId) {
         return productOptionRepository.findById(optionId)
                 .orElseThrow(() -> new EntityNotFoundException("옵션을 찾을 수 없습니다."));
-    }
-
-    @Transactional
-    public ProductOrderResponseDto orderProduct(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) throws JsonProcessingException {
-        Optional<Wishlist> wishlistFound = wishlistService.getWishlistById(user.getId()).stream()
-                .filter(wishlist -> wishlist.getProduct().getId().equals(productId))
-                .findFirst();
-        if (wishlistFound.isPresent()) {
-            Long wishlistId = wishlistFound.get().getId();
-            wishlistService.deleteWishlist(wishlistId);
-        }
-
-        this.decreaseOptionQuantity(productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity());
-
-        kakaoMessageService.sendKakaoOrderMessage(user, productId, productOrderRequestDto);
-
-        return new ProductOrderResponseDto(productId, productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity(), Instant.now().truncatedTo(ChronoUnit.SECONDS), productOrderRequestDto.getMessage());
     }
 }

@@ -1,11 +1,8 @@
 package gift.product.controller.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import gift.auth.LoginUser;
 import gift.product.domain.Product;
 import gift.product.dto.*;
 import gift.product.service.ProductService;
-import gift.user.domain.User;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,10 +67,5 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/product/order/{id}")
-    public ResponseEntity<ProductOrderResponseDto> orderProduct(@LoginUser User user, @PathVariable Long id, @RequestBody ProductOrderRequestDto productOrderRequestDto) throws JsonProcessingException {
-        ProductOrderResponseDto productOrderResponseDto = productService.orderProduct(user, id, productOrderRequestDto);
 
-        return ResponseEntity.ok(productOrderResponseDto);
-    }
 }

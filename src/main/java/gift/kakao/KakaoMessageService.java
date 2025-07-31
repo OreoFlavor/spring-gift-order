@@ -3,7 +3,7 @@ package gift.kakao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import gift.product.dto.ProductOrderRequestDto;
+import gift.order.dto.OrderRequestDto;
 import gift.user.domain.User;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -36,14 +36,14 @@ public class KakaoMessageService {
     }
 
     @Transactional
-    public void sendKakaoOrderMessage(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) throws JsonProcessingException {
+    public void sendKakaoOrderMessage(User user, Long productId, OrderRequestDto orderRequestDto) throws JsonProcessingException {
         kakaoAuthService.updateToken(user);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
         ObjectNode templateObject = objectMapper.createObjectNode();
         templateObject.put("object_type", "text");
-        templateObject.put("text", "상품 주문 완료되었습니다. " + productOrderRequestDto.getMessage());
+        templateObject.put("text", "상품 주문 완료되었습니다. " + orderRequestDto.getMessage());
 
         ObjectNode link = objectMapper.createObjectNode();
         link.put("web_url", "http://localhost:8080/api/product/" + productId);

@@ -1,23 +1,43 @@
-package gift.product.dto;
+package gift.order.domain;
+
+import jakarta.persistence.*;
 
 import java.time.Instant;
 
-public class ProductOrderResponseDto {
+@Entity
+public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private Long productId;
+
+    @Column(nullable = false)
     private Long optionId;
+
+    @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false)
     private Instant orderDateTime;
+
     private String message;
 
-    protected ProductOrderResponseDto() {}
+    protected Order() {}
 
-    public ProductOrderResponseDto(Long productId, Long optionId, Integer quantity, Instant orderDateTime, String message) {
+    public Order(Long productId, Long optionId, Integer quantity, Instant orderDateTime, String message) {
         this.productId = productId;
         this.optionId = optionId;
         this.quantity = quantity;
         this.orderDateTime = orderDateTime;
         this.message = message;
     }
+
+    public Long getId() {
+        return id;
+    }
+
     public Long getProductId() {
         return productId;
     }
