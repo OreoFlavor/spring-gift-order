@@ -76,29 +76,4 @@ public class ProductService {
 
         productRepository.delete(product);
     }
-
-    @Transactional
-    public ProductOption addOptionToProduct(Long productId, ProductOptionSaveRequestDto productOptionSaveRequestDto) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 상품입니다."));
-
-        ProductOption newOption = new ProductOption(productOptionSaveRequestDto.getName(), productOptionSaveRequestDto.getQuantity());
-
-        product.addOption(newOption);
-        return productOptionRepository.save(newOption);
-    }
-
-    @Transactional
-    public void decreaseOptionQuantity(Long optionId, Integer quantity) {
-        ProductOption option = productOptionRepository.findById(optionId)
-                .orElseThrow(() -> new EntityNotFoundException("옵션을 찾을 수 없습니다."));
-
-        option.decreaseQuantity(quantity);
-    }
-
-    @Transactional(readOnly = true)
-    public ProductOption getOption(Long optionId) {
-        return productOptionRepository.findById(optionId)
-                .orElseThrow(() -> new EntityNotFoundException("옵션을 찾을 수 없습니다."));
-    }
 }

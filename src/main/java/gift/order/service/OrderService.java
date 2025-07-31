@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import gift.kakao.KakaoMessageService;
 import gift.order.dto.OrderRequestDto;
 import gift.order.dto.OrderResponseDto;
+import gift.product.service.ProductOptionService;
 import gift.product.service.ProductService;
 import gift.user.domain.User;
 import gift.wishlist.Wishlist;
@@ -18,12 +19,12 @@ import java.util.Optional;
 @Service
 public class OrderService {
     private final WishlistService wishlistService;
-    private final ProductService productService;
+    private final ProductOptionService productOptionService;
     private final KakaoMessageService kakaoMessageService;
 
-    public OrderService(WishlistService wishlistService, ProductService productService, KakaoMessageService kakaoMessageService) {
+    public OrderService(WishlistService wishlistService, ProductOptionService productOptionService, KakaoMessageService kakaoMessageService) {
         this.wishlistService = wishlistService;
-        this.productService = productService;
+        this.productOptionService = productOptionService;
         this.kakaoMessageService = kakaoMessageService;
     }
 
@@ -37,7 +38,7 @@ public class OrderService {
             wishlistService.deleteWishlist(wishlistId);
         }
 
-        productService.decreaseOptionQuantity(orderRequestDto.getOptionId(), orderRequestDto.getQuantity());
+        productOptionService.decreaseOptionQuantity(orderRequestDto.getOptionId(), orderRequestDto.getQuantity());
 
         kakaoMessageService.sendKakaoOrderMessage(user, productId, orderRequestDto);
 
