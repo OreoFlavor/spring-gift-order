@@ -2,6 +2,7 @@ package gift.product.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import gift.kakao.KakaoAuthService;
+import gift.kakao.KakaoMessageService;
 import gift.product.domain.Product;
 import gift.product.domain.ProductOption;
 import gift.product.dto.*;
@@ -26,14 +27,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
     private final WishlistService wishlistService;
-    private final KakaoAuthService kakaoAuthService;
+    private final KakaoMessageService kakaoMessageService;
 
 
-    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository, WishlistService wishlistService, KakaoAuthService kakaoAuthService) {
+    public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository, WishlistService wishlistService, KakaoMessageService kakaoMessageService) {
         this.productRepository = productRepository;
         this.productOptionRepository = productOptionRepository;
         this.wishlistService = wishlistService;
-        this.kakaoAuthService = kakaoAuthService;
+        this.kakaoMessageService = kakaoMessageService;
     }
 
     @Transactional
@@ -118,7 +119,7 @@ public class ProductService {
 
         this.decreaseOptionQuantity(productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity());
 
-        kakaoAuthService.sendKakaoOrderMessage(user, productId, productOrderRequestDto);
+        kakaoMessageService.sendKakaoOrderMessage(user, productId, productOrderRequestDto);
 
         return new ProductOrderResponseDto(productId, productOrderRequestDto.getOptionId(), productOrderRequestDto.getQuantity(), Instant.now().truncatedTo(ChronoUnit.SECONDS), productOrderRequestDto.getMessage());
     }

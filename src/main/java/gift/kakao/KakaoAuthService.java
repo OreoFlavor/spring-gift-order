@@ -1,10 +1,6 @@
 package gift.kakao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import gift.common.exception.RefreshTokenExpiredException;
-import gift.product.dto.ProductOrderRequestDto;
 import gift.user.domain.User;
 import gift.user.repository.UserRepository;
 import gift.user.service.UserService;
@@ -127,36 +123,5 @@ public class KakaoAuthService {
                 userService.updateKakaoUser(user.getId(), kakaoUserPatchRequestDto);
             }
         }
-    }
-
-    @Transactional
-    public void sendKakaoOrderMessage(User user, Long productId, ProductOrderRequestDto productOrderRequestDto) throws JsonProcessingException {
-        this.updateToken(user);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        ObjectNode templateObject = objectMapper.createObjectNode();
-        templateObject.put("object_type", "text");
-        templateObject.put("text", "상품 주문 완료되었습니다. " + productOrderRequestDto.getMessage());
-
-        ObjectNode link = objectMapper.createObjectNode();
-        link.put("web_url", "http://localhost:8080/api/product/" + productId);
-        link.put("mobile_web_url", "http://localhost:8080/api/product/" + productId);
-
-        templateObject.set("link", link);
-        templateObject.put("button_title", "주문 상품 확인");
-
-        String jsonString = objectMapper.writeValueAsString(templateObject);
-
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("template_object", jsonString);
-
-        restClient.post()
-                .uri("https://kapi.kakao.com/v2/api/talk/memo/default/send")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + user.getAccessToken())
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(body)
-                .retrieve()
-                .toBodilessEntity();
     }
 }
