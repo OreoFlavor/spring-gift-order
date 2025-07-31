@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.*;
 public class KakaoAuthController {
 
     private final KakaoAuthService kakaoAuthService;
-    private final UserService userService;
 
-    public KakaoAuthController(KakaoAuthService kakaoAuthService, UserService userService) {
+    public KakaoAuthController(KakaoAuthService kakaoAuthService) {
         this.kakaoAuthService = kakaoAuthService;
-        this.userService = userService;
     }
 
     @GetMapping("/login/page")
