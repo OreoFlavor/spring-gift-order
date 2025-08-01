@@ -1,0 +1,46 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - oreoflavor
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build project with Gradle
+        run: ./gradlew clean build
+
+      - name: Create SSH private key file
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
+          chmod 600 ec2-key.pem
+
+      - name: Upload JAR to EC2
+        run: |
+          JAR_NAME=$(ls build/libs/*.jar | tail -n 1)
+          scp -i ec2-key.pem -o StrictHostKeyChecking=no "$JAR_NAME" ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app/
+
+      - name: Upload config file to EC2
+        run: |
+          scp -i ec2-key.pem -o StrictHostKeyChecking=no src/main/resources/application-dev.properties ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app/config/
+
+      - name: Run deploy script on EC2
+        run: |
+          ssh -i ec2-key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            pkill -f 'java' || true
+            JAR_NAME=$(ls /home/ubuntu/app/*.jar | tail -n 1)
+            nohup java -Dspring.profiles.active=dev -Dspring.config.location=/home/ubuntu/app/config/application-dev.properties -jar $JAR_NAME > /home/ubuntu/app/logs/app.log 2>&1 &
+          EOF
