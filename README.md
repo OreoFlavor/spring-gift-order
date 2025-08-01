@@ -16,6 +16,12 @@
 
 ### 3. 메시지 전송 구현
 
+### Step3
+
+### 1. github Action 배포 yml 작성
+
+### 2. CORS 설정
+
 # spring-gift-enhancement
 
 ## 구현 기능 목록
