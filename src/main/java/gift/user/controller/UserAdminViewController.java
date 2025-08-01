@@ -40,7 +40,7 @@ public class UserAdminViewController {
 
     @GetMapping("/add")
     public String addForm(Model model) {
-        model.addAttribute("userSaveRequestDto", new UserSaveRequestDto());
+        model.addAttribute("userSaveRequestDto", new UserSaveRequestDto("", ""));
         return "userAddForm";
     }
 
@@ -56,7 +56,7 @@ public class UserAdminViewController {
     @GetMapping("/{id}/update")
     public String updateForm(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
-        UserPatchRequestDto userPatchRequestDto = new UserPatchRequestDto(user);
+        UserPatchRequestDto userPatchRequestDto = new UserPatchRequestDto(user.getEmail(), user.getPassword());
         model.addAttribute("userPatchRequestDto", userPatchRequestDto);
         return "userUpdateForm";
     }

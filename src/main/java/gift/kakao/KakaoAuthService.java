@@ -1,24 +1,36 @@
 package gift.kakao;
 
+import gift.auth.JwtProvider;
+import gift.common.exception.RefreshTokenExpiredException;
+import gift.user.domain.User;
+import gift.user.repository.UserRepository;
+import gift.user.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class KakaoAuthService {
     private final String clientId;
     private final String redirectUri;
-
     private final RestClient restClient;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
-    public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri) {
+    public KakaoAuthService(@Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri, UserService userService, UserRepository userRepository, JwtProvider jwtProvider) {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
 
@@ -27,12 +39,16 @@ public class KakaoAuthService {
         requestFactory.setReadTimeout(Duration.ofSeconds(7));
 
         this.restClient = RestClient.builder()
-                .baseUrl("https://kauth.kakao.com")
                 .requestFactory(requestFactory)
                 .build();
+
+        this.userService = userService;
+        this.userRepository = userRepository;
+        this.jwtProvider = jwtProvider;
     }
 
-    public String getAccessToken(String code) {
+    @Transactional
+    public KakaoTokenResponseDto getTokenInfo(String code) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", clientId);
@@ -40,15 +56,44 @@ public class KakaoAuthService {
         params.add("code", code);
 
         KakaoTokenResponseDto kakaoTokenResponseDto = restClient.post()
-                .uri("/oauth/token")
+                .uri("https://kauth.kakao.com/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(params)
                 .retrieve()
                 .body(KakaoTokenResponseDto.class);
 
-        return kakaoTokenResponseDto.getAccessToken();
+        return kakaoTokenResponseDto;
     }
 
+    @Transactional
+    public String getUserId(String accessToken) {
+        Map response = restClient.get()
+                .uri("https://kapi.kakao.com/v1/user/access_token_info")
+                .header(HttpHeaders.AUTHORIZATION, " Bearer " + accessToken)
+                .retrieve()
+                .body(Map.class);
+        return response.get("id").toString();
+    }
+
+    @Transactional
+    public String kakaoUserLogin(String code) {
+        KakaoTokenResponseDto kakaoTokenResponseDto = getTokenInfo(code);
+        String userId = getUserId(kakaoTokenResponseDto.getAccessToken());
+        String email = userId + "@kakao.com";
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if(optionalUser.isPresent()) {
+            return jwtProvider.createToken(optionalUser.get());
+        }
+        else {
+            KakaoUserSaveRequestDto kakaoUserSaveRequestDto = new KakaoUserSaveRequestDto(email, "default", kakaoTokenResponseDto.getAccessToken(), kakaoTokenResponseDto.refreshToken, Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), Instant.now().plusSeconds(kakaoTokenResponseDto.getRefreshTokenExpiresIn()));
+            userService.createKakaoUser(kakaoUserSaveRequestDto);
+            return jwtProvider.createToken(userService.findByEmail(email));
+        }
+    }
+
+    @Transactional
     public String getLoginUrl() {
         return UriComponentsBuilder.newInstance()
                 .scheme("http")
@@ -57,6 +102,36 @@ public class KakaoAuthService {
                 .queryParam("response_type", "code")
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
+                .queryParam("scope", "talk_message")
                 .toUriString();
+    }
+
+    @Transactional
+    public void updateToken(User user) {
+        if (Instant.now().isAfter(user.getOAuthToken().getRefreshTokenExpiredAt())) { //리프레시 만료
+            throw new RefreshTokenExpiredException("재로그인이 필요합니다.");
+        }
+        else if (Instant.now().isAfter(user.getOAuthToken().getAccessTokenExpiredAt())) { //액세스 만료/리프레시 만료 x
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("grant_type", "refresh_token");
+            params.add("client_id", clientId);
+            params.add("refresh_token", user.getOAuthToken().getRefreshToken());
+
+            KakaoTokenResponseDto kakaoTokenResponseDto = restClient.post()
+                    .uri("https://kauth.kakao.com/oauth/token")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(params)
+                    .retrieve()
+                    .body(KakaoTokenResponseDto.class);
+
+            if (Instant.now().plusSeconds(2764800).isBefore(user.getOAuthToken().getRefreshTokenExpiredAt())) { //리프레시 갱신 불가(잔여 만료 시간 한달 이상)
+                KakaoUserPatchRequestDto kakaoUserPatchRequestDto = new KakaoUserPatchRequestDto(user.getEmail(), user.getPassword(), kakaoTokenResponseDto.accessToken, user.getOAuthToken().getRefreshToken(), Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), user.getOAuthToken().getRefreshTokenExpiredAt());
+                userService.updateKakaoUser(user.getId(), kakaoUserPatchRequestDto);
+            }
+            else { //리프레시 갱신 가능(잔여 만료 시간 한달 이내)
+                KakaoUserPatchRequestDto kakaoUserPatchRequestDto = new KakaoUserPatchRequestDto(user.getEmail(), user.getPassword(), kakaoTokenResponseDto.accessToken, kakaoTokenResponseDto.refreshToken, Instant.now().plusSeconds(kakaoTokenResponseDto.getExpiresIn()), Instant.now().plusSeconds(kakaoTokenResponseDto.getRefreshTokenExpiresIn()));
+                userService.updateKakaoUser(user.getId(), kakaoUserPatchRequestDto);
+            }
+        }
     }
 }

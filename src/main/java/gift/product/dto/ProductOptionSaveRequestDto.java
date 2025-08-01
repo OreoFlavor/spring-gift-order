@@ -13,6 +13,8 @@ public class ProductOptionSaveRequestDto {
     @Max(value = 100_000_000, message = "수량은 1억 미만입니다.")
     private Integer quantity;
 
+    protected ProductOptionSaveRequestDto() {}
+
     public ProductOptionSaveRequestDto(String name, Integer quantity) {
         this.name = name;
         this.quantity = quantity;

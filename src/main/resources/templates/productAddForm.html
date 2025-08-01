@@ -19,6 +19,11 @@
         <label>이미지 주소: <input type="text" th:field="*{imageUrl}" /></label>
         <div class="error" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></div>
     </div>
+    <div>
+        <label>옵션: <input type="text" name="options[0].name"/></label>
+        <label>수량: <input type="number" name="options[0].quantity"/></label>
+        <div class="error" th:if="${#fields.hasErrors('options')}" th:errors="*{options}"></div>
+    </div>
     <button type="submit">추가</button>
 </form>
 <a th:href="@{/api/admin/product/page}">뒤로가기</a>

@@ -1,5 +1,6 @@
 package gift.common.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -58,7 +59,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RestClientResponseException.class)
-    public ResponseEntity<String> handleWebClientResponseException(RestClientResponseException e) {
+    public ResponseEntity<String> handleRestClientResponseException(RestClientResponseException e) {
         return ResponseEntity.status(e.getStatusCode()).body(e.getMessage());
+    }
+
+    @ExceptionHandler(RefreshTokenExpiredException.class)
+    public ResponseEntity<String> handleRefreshTokenExpiredException(RefreshTokenExpiredException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<String> handleJsonProcessingException(JsonProcessingException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("메시지 템플릿 생성 중 오류 발생");
     }
 }

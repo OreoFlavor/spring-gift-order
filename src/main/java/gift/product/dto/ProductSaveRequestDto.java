@@ -21,7 +21,7 @@ public class ProductSaveRequestDto {
     private String imageUrl;
 
     @Size(min = 1, message = "1개 이상의 옵션은 필수입니다.")
-    private List<ProductOptionSaveRequestDto> options;
+    private List<ProductOptionSaveRequestDto> options = new ArrayList<>();
 
     public ProductSaveRequestDto() {}
   

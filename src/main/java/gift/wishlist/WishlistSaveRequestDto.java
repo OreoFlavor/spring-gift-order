@@ -2,9 +2,7 @@ package gift.wishlist;
 
 public class WishlistSaveRequestDto {
 
-    private Long productId;
-
-    protected WishlistSaveRequestDto() {}
+    private final Long productId;
 
     public WishlistSaveRequestDto(Long productId) {
         this.productId = productId;
@@ -12,9 +10,5 @@ public class WishlistSaveRequestDto {
 
     public Long getProductId() {
         return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
     }
 }

@@ -1,9 +1,7 @@
 package gift.product.controller.api;
 
 import gift.product.domain.Product;
-import gift.product.dto.ProductPatchRequestDto;
-import gift.product.dto.ProductSaveRequestDto;
-import gift.product.dto.ProductResponseDto;
+import gift.product.dto.*;
 import gift.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -68,4 +66,6 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }

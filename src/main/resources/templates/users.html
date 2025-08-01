@@ -7,11 +7,15 @@
 <body>
 <h1>회원 리스트</h1>
 <table>
-    <tr><th>ID</th><th>이메일</th><th>비밀번호</th></tr>
+    <tr><th>ID</th><th>이메일</th><th>비밀번호</th><th>AccessToken</th><th>RefreshToken</th><th>AccessToken 만료시간</th><th>RefreshToken 만료시간</th></tr>
     <tr th:each="user : ${users}">
         <td th:text="${user.id}"></td>
         <td th:text="${user.email}"></td>
         <td th:text="${user.password}"></td>
+        <td th:text="${user.getOAuthToken().accessToken}"></td>
+        <td th:text="${user.getOAuthToken().refreshToken}"></td>
+        <td th:text="${user.getOAuthToken().accessTokenExpiredAt}"></td>
+        <td th:text="${user.getOAuthToken().refreshTokenExpiredAt}"></td>
         <td><a th:href="@{|/api/admin/user/${user.id}/update|}">수정</a></td>
         <td><form th:action="@{|/api/admin/user/${user.id}/delete|}" method="post">
             <input type="hidden" name="_method" value="delete" />

@@ -1,12 +1,10 @@
 package gift.kakao;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/kakaoAuth")
@@ -27,7 +25,9 @@ public class KakaoAuthController {
 
     @GetMapping("/callback")
     public ResponseEntity<?> callback(@RequestParam("code") String code) {
-        String accessToken = kakaoAuthService.getAccessToken(code);
-        return ResponseEntity.ok("토큰 발급 성공" + accessToken);
+        String token = kakaoAuthService.kakaoUserLogin(code);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer "+token).body(token);
     }
 }

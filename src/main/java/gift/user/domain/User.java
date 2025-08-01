@@ -1,8 +1,10 @@
 package gift.user.domain;
 
+import gift.OAuth.OAuthToken;
 import gift.auth.PasswordUtil;
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.Base64;
 
 @Entity
@@ -20,8 +22,19 @@ public class User {
 
     private String salt;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private OAuthToken oAuthToken;
+
     protected User() {
 
+    }
+
+    public User(Long id, String email, String password, String salt, OAuthToken oAuthToken) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.salt = salt;
+        this.oAuthToken = oAuthToken;
     }
 
     public User(Long id, String email, String password, String salt) {
@@ -31,8 +44,12 @@ public class User {
         this.salt = salt;
     }
 
+    public User(String email, String password, String salt, OAuthToken oAuthToken) {
+        this(null, email, password, salt, oAuthToken);
+    }
+
     public User(String email, String password, String salt) {
-        this(null, email, password, salt);
+        this(null, email, password, salt, new OAuthToken());
     }
   
     public boolean isEqualToPassword(String password) {
@@ -69,5 +86,14 @@ public class User {
 
     public String getSalt() {
         return salt;
+    }
+
+    public OAuthToken getOAuthToken() {
+        return oAuthToken;
+    }
+
+    public void setOAuthToken(OAuthToken oAuthToken) {
+        this.oAuthToken = oAuthToken;
+        oAuthToken.setUser(this);
     }
 }
