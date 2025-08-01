@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - oreoflavor
+      - step3
 
 jobs:
   deploy:
