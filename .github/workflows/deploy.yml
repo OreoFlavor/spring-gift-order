@@ -43,7 +43,8 @@ jobs:
 
       - name: Upload config file to EC2
         run: |
-          scp -i ec2-key.pem -o StrictHostKeyChecking=no src/main/resources/application-dev.properties ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app/config/
+          scp -i ec2-key.pem -o StrictHostKeyChecking=no config/application-dev.properties ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app/config/
+
 
       - name: Run deploy script on EC2
         run: |
