@@ -20,6 +20,14 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Create application-dev.properties dynamically
+        run: |
+          mkdir -p config
+          echo "jwt.secret=${{ secrets.JWT_SECRET }}" > config/application-dev.properties
+          echo "spring.jpa.properties.hibernate.dialect=${{ secrets.HIBERNATE_DIALECT }}" >> config/application-dev.properties
+          echo "kakao.client_id=${{ secrets.KAKAO_CLIENT_ID }}" >> config/application-dev.properties
+          echo "kakao.redirect_uri=${{ secrets.KAKAO_REDIRECT_URI }}" >> config/application-dev.properties
+
       - name: Build project with Gradle
         run: ./gradlew clean build
 
@@ -27,14 +35,6 @@ jobs:
         run: |
           echo "${{ secrets.EC2_KEY }}" > ec2-key.pem
           chmod 600 ec2-key.pem
-
-      - name: Create application-dev.properties dynamically
-        run: |
-          mkdir -p config
-          echo "jwt.secret=${{ secrets.JWT_SECRET }}" >> config/application-dev.properties
-          echo "spring.jpa.properties.hibernate.dialect=${{ secrets.HIBERNATE_DIALECT }}" >> config/application-dev.properties
-          echo "kakao.client_id=${{ secrets.KAKAO_CLIENT_ID }}" >> config/application-dev.properties
-          echo "kakao.redirect_uri=${{ secrets.KAKAO_REDIRECT_URI }}" >> config/application-dev.properties
 
       - name: Upload JAR to EC2
         run: |
