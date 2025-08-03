@@ -50,7 +50,7 @@ public class UserAdminViewController {
             return "userAddForm";
         }
         userService.createUser(userSaveRequestDto);
-        return "redirect:/api/admin/user/list";
+        return "redirect:/admin/user/list";
     }
 
     @GetMapping("/{id}/update")
@@ -67,13 +67,13 @@ public class UserAdminViewController {
             return "userUpdateForm";
         }
         userService.updateUser(id, userPatchRequestDto);
-        return "redirect:/api/admin/user/list";
+        return "redirect:/admin/user/list";
     }
 
     @DeleteMapping("/{id}/delete")
     public String deleteById(@PathVariable Long id) {
         userService.deleteUser(id);
-        return "redirect:/api/admin/user/list";
+        return "redirect:/admin/user/list";
     }
 
 }

@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>회원 추가</h1>
-<form th:action="@{/api/admin/user/add}" th:object="${userSaveRequestDto}" method="POST">
+<form th:action="@{/admin/user/add}" th:object="${userSaveRequestDto}" method="POST">
     <div>
         <label>이메일: <input type="text" th:field="*{email}" /></label>
         <div class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
@@ -17,6 +17,6 @@
     </div>
     <button type="submit">추가</button>
 </form>
-<a th:href="@{/api/admin/user/list}">뒤로가기</a>
+<a th:href="@{/admin/user/list}">뒤로가기</a>
 </body>
 </html>

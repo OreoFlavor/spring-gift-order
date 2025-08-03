@@ -71,7 +71,7 @@ public class ProductAdminViewController {
         redirectAttributes.addAttribute("size", 10);
         redirectAttributes.addAttribute("sortBy", "id");
         redirectAttributes.addAttribute("sortOrder", "asc");
-        return "redirect:/api/admin/product/page";
+        return "redirect:/admin/product/page";
     }
 
     @GetMapping("/{id}/update")
@@ -92,7 +92,7 @@ public class ProductAdminViewController {
         redirectAttributes.addAttribute("size", 10);
         redirectAttributes.addAttribute("sortBy", "id");
         redirectAttributes.addAttribute("sortOrder", "asc");
-        return "redirect:/api/admin/product/page";
+        return "redirect:/admin/product/page";
     }
 
     @DeleteMapping("/{id}/delete")
@@ -103,6 +103,6 @@ public class ProductAdminViewController {
         redirectAttributes.addAttribute("size", 10);
         redirectAttributes.addAttribute("sortBy", "id");
         redirectAttributes.addAttribute("sortOrder", "asc");
-        return "redirect:/api/admin/product/page";
+        return "redirect:/admin/product/page";
     }
 }
