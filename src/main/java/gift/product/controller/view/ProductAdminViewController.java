@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.*;
 
 @Controller
-@RequestMapping("/api/admin/product")
+@RequestMapping("/admin/product")
 public class ProductAdminViewController {
     private final ProductService productService;
 

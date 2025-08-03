@@ -11,8 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@RequestMapping("/api/order")
 public class OrderController {
     private final OrderService orderService;
 
@@ -20,7 +22,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping("/product/order/{id}")
+    @PostMapping("/add/{id}")
     public ResponseEntity<OrderResponseDto> orderProduct(@LoginUser User user, @PathVariable Long id, @RequestBody OrderRequestDto orderRequestDto) throws JsonProcessingException {
         OrderResponseDto orderResponseDto = orderService.orderProduct(user, id, orderRequestDto);
 

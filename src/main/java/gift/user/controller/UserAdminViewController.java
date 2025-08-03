@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/api/admin/user")
+@RequestMapping("/admin/user")
 public class UserAdminViewController {
 
     private final UserService userService;

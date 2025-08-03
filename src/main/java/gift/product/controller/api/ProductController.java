@@ -15,7 +15,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/product")
 public class ProductController {
     private final ProductService productService;
 
@@ -23,7 +23,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @GetMapping("/product/list")
+    @GetMapping("/list")
     public ResponseEntity<List<ProductResponseDto>> findAll() {
         List<ProductResponseDto> productResponseDtoList = productService.findAll()
                 .stream()
@@ -32,7 +32,7 @@ public class ProductController {
         return ResponseEntity.ok(productResponseDtoList);
     }
 
-    @GetMapping("/product/page")
+    @GetMapping("/page")
     public ResponseEntity<Page<ProductResponseDto>> findAllByPage(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
             ) {
@@ -41,7 +41,7 @@ public class ProductController {
         return ResponseEntity.ok(responseDtoPage);
     }
 
-    @PostMapping("/product/add")
+    @PostMapping("/add")
     public ResponseEntity<ProductResponseDto> saveProduct(@RequestBody @Valid ProductSaveRequestDto productSaveRequestDto) {
         Product product =  productService.createProduct(productSaveRequestDto);
         return ResponseEntity
@@ -49,19 +49,19 @@ public class ProductController {
                 .body(new ProductResponseDto(product));
     }
 
-    @GetMapping("/product/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> findById(@PathVariable Long id) {
         Product product = productService.findById(id);
         return ResponseEntity.ok(new ProductResponseDto(product));
     }
 
-    @PatchMapping("/product/{id}/update")
+    @PatchMapping("/{id}/update")
     public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductPatchRequestDto productPatchRequestDto) {
         Product product = productService.updateProduct(id, productPatchRequestDto);
         return ResponseEntity.ok(new ProductResponseDto(product));
     }
 
-    @DeleteMapping("/product/{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
