@@ -34,9 +34,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // 모든 경로에 대해
-                .allowedOrigins("http://localhost:3000") // 클라이언트 도메인
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+        registry.addMapping("/api/**")
+                .allowedOrigins("http://43.203.31.174") // 클라이언트 도메인
+                .allowedMethods("GET", "POST", "PATCH", "DELETE")
                 .allowCredentials(true); // 쿠키 포함 허용 시
     }
 }
