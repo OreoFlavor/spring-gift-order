@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.*;
 
 @Controller
-@RequestMapping("/api/admin/product")
+@RequestMapping("/admin/product")
 public class ProductAdminViewController {
     private final ProductService productService;
 
@@ -71,7 +71,7 @@ public class ProductAdminViewController {
         redirectAttributes.addAttribute("size", 10);
         redirectAttributes.addAttribute("sortBy", "id");
         redirectAttributes.addAttribute("sortOrder", "asc");
-        return "redirect:/api/admin/product/page";
+        return "redirect:/admin/product/page";
     }
 
     @GetMapping("/{id}/update")
@@ -92,7 +92,7 @@ public class ProductAdminViewController {
         redirectAttributes.addAttribute("size", 10);
         redirectAttributes.addAttribute("sortBy", "id");
         redirectAttributes.addAttribute("sortOrder", "asc");
-        return "redirect:/api/admin/product/page";
+        return "redirect:/admin/product/page";
     }
 
     @DeleteMapping("/{id}/delete")
@@ -103,6 +103,6 @@ public class ProductAdminViewController {
         redirectAttributes.addAttribute("size", 10);
         redirectAttributes.addAttribute("sortBy", "id");
         redirectAttributes.addAttribute("sortOrder", "asc");
-        return "redirect:/api/admin/product/page";
+        return "redirect:/admin/product/page";
     }
 }

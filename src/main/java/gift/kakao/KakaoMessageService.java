@@ -46,8 +46,8 @@ public class KakaoMessageService {
         templateObject.put("text", "상품 주문 완료되었습니다. " + orderRequestDto.getMessage());
 
         ObjectNode link = objectMapper.createObjectNode();
-        link.put("web_url", "http://localhost:8080/api/product/" + productId);
-        link.put("mobile_web_url", "http://localhost:8080/api/product/" + productId);
+        link.put("web_url", "http://43.203.31.174//api/product/" + productId);
+        link.put("mobile_web_url", "http://43.203.31.174//api/product/" + productId);
 
         templateObject.set("link", link);
         templateObject.put("button_title", "주문 상품 확인");

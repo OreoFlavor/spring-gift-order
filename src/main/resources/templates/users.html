@@ -16,18 +16,18 @@
         <td th:text="${user.getOAuthToken().refreshToken}"></td>
         <td th:text="${user.getOAuthToken().accessTokenExpiredAt}"></td>
         <td th:text="${user.getOAuthToken().refreshTokenExpiredAt}"></td>
-        <td><a th:href="@{|/api/admin/user/${user.id}/update|}">수정</a></td>
-        <td><form th:action="@{|/api/admin/user/${user.id}/delete|}" method="post">
+        <td><a th:href="@{|/admin/user/${user.id}/update|}">수정</a></td>
+        <td><form th:action="@{|/admin/user/${user.id}/delete|}" method="post">
             <input type="hidden" name="_method" value="delete" />
             <button type="submit">삭제</button>
         </form></td>
     </tr>
 </table>
 <div>
-    <a th:href="@{/api/admin/user/add}">회원 생성</a>
+    <a th:href="@{/admin/user/add}">회원 생성</a>
 </div>
 <div>
-    <a th:href="@{/api/admin/product/page}">상품 페이지로 이동</a>
+    <a th:href="@{/admin/product/page}">상품 페이지로 이동</a>
 </div>
 </body>
 </html>

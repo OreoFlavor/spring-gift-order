@@ -6,7 +6,7 @@
 </head>
 <body>
 <h1>상품 추가</h1>
-<form th:action="@{/api/admin/product/add}" th:object="${productSaveRequestDto}" method="POST">
+<form th:action="@{/admin/product/add}" th:object="${productSaveRequestDto}" method="POST">
     <div>
         <label>상품명: <input type="text" th:field="*{name}" /></label>
         <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
@@ -26,6 +26,6 @@
     </div>
     <button type="submit">추가</button>
 </form>
-<a th:href="@{/api/admin/product/page}">뒤로가기</a>
+<a th:href="@{/admin/product/page}">뒤로가기</a>
 </body>
 </html>
